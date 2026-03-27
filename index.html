@@ -346,8 +346,106 @@
 
     .process-step p { font-size: 0.88rem; color: var(--muted); }
 
+    /* ── PROJECTS ── */
+    #projects { background: var(--navy); }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .project-card {
+      border: 1px solid rgba(120, 154, 181, 0.15);
+      border-radius: 2px;
+      overflow: hidden;
+      background: var(--navy-2);
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .project-card:hover {
+      border-color: rgba(184, 152, 106, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .project-media {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%; /* 16:9 */
+      background: var(--navy-3);
+    }
+
+    .project-media iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .project-media-link {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      background: linear-gradient(135deg, rgba(11,22,36,0.6) 0%, rgba(22,39,64,0.4) 100%);
+      transition: background 0.3s;
+    }
+
+    .project-media-link:hover { background: rgba(11,22,36,0.3); }
+
+    .project-media-placeholder {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.5;
+    }
+
+    .project-media-icon {
+      font-size: 3rem;
+      color: var(--gold);
+      filter: drop-shadow(0 2px 12px rgba(184,152,106,0.5));
+    }
+
+    .project-body { padding: 1.75rem; }
+
+    .project-tag {
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    .project-body h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 0.6rem;
+    }
+
+    .project-body p { font-size: 0.88rem; color: var(--muted); line-height: 1.8; margin-bottom: 1.25rem; }
+
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--steel);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .project-link:hover { color: var(--gold); }
+    .project-link::after { content: '→'; }
+
     /* ── CONTACT ── */
-    #contact { background: var(--navy); }
+    #contact { background: var(--navy-2); }
 
     .contact-box {
       max-width: 640px;
@@ -467,6 +565,7 @@
       <li><a href="#services">Services</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#process">Process</a></li>
+      <li><a href="#projects">Projects</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
   </nav>
@@ -575,6 +674,52 @@
     </div>
   </section>
 
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-inner">
+      <p class="section-label">Creative Work</p>
+      <h2 class="section-title">Featured Projects</h2>
+      <p class="section-desc">Experiments at the intersection of technology, storytelling, and AI.</p>
+
+      <div class="projects-grid">
+
+        <!-- Pod of the Gods -->
+        <div class="project-card">
+          <div class="project-media">
+            <iframe
+              src="https://www.youtube.com/embed/YVfBPH_HK3s"
+              title="Pod of the Gods Trailer"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <div class="project-body">
+            <p class="project-tag">Podcast · Creative Fiction</p>
+            <h3>Pod of the Gods</h3>
+            <p>A cinematic trailer for a fictional podcast where ancient deities discuss modern life. An experiment in worldbuilding, voice, and AI-assisted production.</p>
+            <a class="project-link" href="https://youtu.be/YVfBPH_HK3s" target="_blank" rel="noopener">Watch on YouTube</a>
+          </div>
+        </div>
+
+        <!-- Ardia Chronicles -->
+        <div class="project-card">
+          <div class="project-media">
+            <a class="project-media-link" href="https://www.ardia-chronicles.com" target="_blank" rel="noopener">
+              <span class="project-media-icon">◈</span>
+            </a>
+          </div>
+          <div class="project-body">
+            <p class="project-tag">AI · Generative Media · Journalism</p>
+            <h3>Ardia Chronicles</h3>
+            <p>An AI-generated newspaper for a fictional world, driven by autonomous AI bot reporters. Each edition surfaces new stories, politics, and culture from a living, breathing fictional universe.</p>
+            <a class="project-link" href="https://www.ardia-chronicles.com" target="_blank" rel="noopener">Visit the Chronicles</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- CONTACT -->
   <section id="contact">
     <div class="section-inner">
@@ -626,9 +771,10 @@
       <li><a href="#services">Services</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#process">Process</a></li>
+      <li><a href="#projects">Projects</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
-    <p class="footer-copy">&copy; 2026 VerretTech, LCC. All rights reserved.</p>
+    <p class="footer-copy">&copy; 2026 VerretTech, LLC. All rights reserved.</p>
   </footer>
 
 </body>
