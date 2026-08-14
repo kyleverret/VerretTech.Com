@@ -278,6 +278,24 @@
       white-space: nowrap;
     }
 
+    /* ── PATROL TITLE GROUP (h2 + avg rank badge stacked) ── */
+    .patrol-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      min-width: 0;
+    }
+
+    .avg-rank-badge {
+      display: none;
+      font-size: 0.63rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .avg-rank-badge.visible { display: block; }
+
     .sort-controls {
       display: flex;
       align-items: center;
@@ -386,13 +404,75 @@
       font-size: 0.88rem;
       font-weight: 500;
       color: var(--white);
-      margin-bottom: 0.1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .tile-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .tile-rank-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      letter-spacing: 0.04em;
+      padding: 0.1rem 0.4rem;
+      border-radius: 2px;
+      white-space: nowrap;
     }
 
     .tile-nights {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--muted);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    /* ── PATROL CHART ── */
+    .patrol-chart {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(120, 154, 181, 0.08);
+    }
+
+    .patrol-chart:empty { display: none; }
+
+    .chart-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .pie-chart {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.22rem;
+      width: 100%;
+    }
+
+    .chart-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.67rem;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
 
     /* ── FOOTER ── */
@@ -484,7 +564,7 @@
 
         <div class="control-card">
           <h3>1. Load Roster</h3>
-          <span class="control-label">Upload a CSV with First Name, Last Name, and nights camped.</span>
+          <span class="control-label">Upload a Troop Nights Camped CSV — supports First Name, Last Name, Rank, BSA Number, Current Patrol, Nights Camped format.</span>
           <input type="file" id="csvFile" accept=".csv" />
           <button id="downloadExampleBtn" class="planner-btn btn-steel">Download Example Roster</button>
           <p id="roster-file-error" class="error-text" style="display:none;"></p>
@@ -532,7 +612,10 @@
 
           <div class="stack-card">
             <div class="stack-card-header">
-              <h2>Patrol 1</h2>
+              <div class="patrol-title-group">
+                <h2>Patrol 1</h2>
+                <span class="avg-rank-badge" id="avg-rank-1"></span>
+              </div>
               <div class="patrol-badge">
                 <span class="nights-badge blue">Nights: <span id="total-1">0</span></span>
                 <button class="reset-patrol-btn" data-patrol-id="1" title="Reset Patrol 1">
@@ -541,11 +624,15 @@
               </div>
             </div>
             <div id="patrol-1" class="drop-zone"></div>
+            <div id="chart-1" class="patrol-chart"></div>
           </div>
 
           <div class="stack-card">
             <div class="stack-card-header">
-              <h2>Patrol 2</h2>
+              <div class="patrol-title-group">
+                <h2>Patrol 2</h2>
+                <span class="avg-rank-badge" id="avg-rank-2"></span>
+              </div>
               <div class="patrol-badge">
                 <span class="nights-badge green">Nights: <span id="total-2">0</span></span>
                 <button class="reset-patrol-btn" data-patrol-id="2" title="Reset Patrol 2">
@@ -554,11 +641,15 @@
               </div>
             </div>
             <div id="patrol-2" class="drop-zone"></div>
+            <div id="chart-2" class="patrol-chart"></div>
           </div>
 
           <div class="stack-card">
             <div class="stack-card-header">
-              <h2>Patrol 3</h2>
+              <div class="patrol-title-group">
+                <h2>Patrol 3</h2>
+                <span class="avg-rank-badge" id="avg-rank-3"></span>
+              </div>
               <div class="patrol-badge">
                 <span class="nights-badge gold">Nights: <span id="total-3">0</span></span>
                 <button class="reset-patrol-btn" data-patrol-id="3" title="Reset Patrol 3">
@@ -567,11 +658,15 @@
               </div>
             </div>
             <div id="patrol-3" class="drop-zone"></div>
+            <div id="chart-3" class="patrol-chart"></div>
           </div>
 
           <div class="stack-card">
             <div class="stack-card-header">
-              <h2>Patrol 4</h2>
+              <div class="patrol-title-group">
+                <h2>Patrol 4</h2>
+                <span class="avg-rank-badge" id="avg-rank-4"></span>
+              </div>
               <div class="patrol-badge">
                 <span class="nights-badge red">Nights: <span id="total-4">0</span></span>
                 <button class="reset-patrol-btn" data-patrol-id="4" title="Reset Patrol 4">
@@ -580,6 +675,7 @@
               </div>
             </div>
             <div id="patrol-4" class="drop-zone"></div>
+            <div id="chart-4" class="patrol-chart"></div>
           </div>
 
         </div>
@@ -603,6 +699,24 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+
+      // ── Rank constants ──
+      const RANK_VALUES = {
+        'NO RANK': 1, 'Scout': 2, 'Tenderfoot': 3, 'Second Class': 4,
+        'First Class': 5, 'Star': 6, 'Life': 7, 'Eagle': 8
+      };
+      const RANK_NAMES = ['', 'NO RANK', 'Scout', 'Tenderfoot', 'Second Class', 'First Class', 'Star', 'Life', 'Eagle'];
+      const RANK_STYLES = {
+        'NO RANK':      { solid: '#9ca3af', bg: 'rgba(156,163,175,0.12)', border: 'rgba(156,163,175,0.3)',  text: '#9ca3af' },
+        'Scout':        { solid: '#4ade80', bg: 'rgba(74,222,128,0.1)',   border: 'rgba(74,222,128,0.3)',   text: '#4ade80' },
+        'Tenderfoot':   { solid: '#a3e635', bg: 'rgba(163,230,53,0.1)',   border: 'rgba(163,230,53,0.3)',   text: '#a3e635' },
+        'Second Class': { solid: '#38bdf8', bg: 'rgba(56,189,248,0.1)',   border: 'rgba(56,189,248,0.3)',   text: '#38bdf8' },
+        'First Class':  { solid: '#818cf8', bg: 'rgba(129,140,248,0.1)',  border: 'rgba(129,140,248,0.3)',  text: '#818cf8' },
+        'Star':         { solid: '#c084fc', bg: 'rgba(192,132,252,0.1)',  border: 'rgba(192,132,252,0.3)',  text: '#c084fc' },
+        'Life':         { solid: '#fb923c', bg: 'rgba(251,146,60,0.1)',   border: 'rgba(251,146,60,0.3)',   text: '#fb923c' },
+        'Eagle':        { solid: '#fbbf24', bg: 'rgba(251,191,36,0.12)',  border: 'rgba(251,191,36,0.35)',  text: '#fbbf24' }
+      };
+
       const csvFileInput        = document.getElementById('csvFile');
       const rosterFileError     = document.getElementById('roster-file-error');
       const downloadExampleBtn  = document.getElementById('downloadExampleBtn');
@@ -659,32 +773,74 @@
 
       function handleDownloadExample() {
         const rows = [
-          ['First Name', 'Last Name', 'nights camped'],
-          ['John', 'Doe', '15'],
-          ['Jane', 'Smith', '22'],
-          ['Peter', 'Jones', '8'],
-          ['Mary', 'Williams', '31']
+          ['First Name', 'Last Name', 'Rank', 'BSA Number', 'Current Patrol', 'Nights Camped'],
+          ['John', 'Doe', 'Star', '12345678', 'Eagles', '15'],
+          ['Jane', 'Smith', 'Life', '87654321', 'Eagles', '22'],
+          ['Peter', 'Jones', 'Tenderfoot', '11223344', 'Falcons', '8'],
+          ['Mary', 'Williams', 'Eagle', '44332211', 'Falcons', '31']
         ];
         triggerCSVDownload(rows, 'roster_example.csv');
+      }
+
+      function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') { inQuotes = !inQuotes; }
+          else if (ch === ',' && !inQuotes) { result.push(current); current = ''; }
+          else { current += ch; }
+        }
+        result.push(current);
+        return result;
       }
 
       function parseRosterCSV(text) {
         const lines = text.trim().split(/\r?\n/);
         if (lines.length < 2) throw new Error('CSV must have a header and at least one data row.');
         const header = lines[0].split(',').map(h => h.trim().toLowerCase());
-        const fi = header.indexOf('first name');
-        const li = header.indexOf('last name');
-        const ni = header.indexOf('nights camped');
+
+        const fi   = header.indexOf('first name');
+        const li   = header.indexOf('last name');
+        const ni   = header.indexOf('nights camped');
+        const ri   = header.indexOf('rank');
+        const bsai = header.indexOf('bsa number');
+
         if (fi === -1 || li === -1 || ni === -1)
-          throw new Error("Roster CSV must contain columns: 'First Name', 'Last Name', 'nights camped'.");
-        return lines.slice(1).map((line, idx) => {
-          const d = line.split(',');
-          const firstName   = d[fi]?.trim();
-          const lastName    = d[li]?.trim();
+          throw new Error("CSV must contain columns: 'First Name', 'Last Name', 'Nights Camped'.");
+
+        const seen = new Set();
+        const members = [];
+
+        lines.slice(1).forEach((line, idx) => {
+          if (!line.trim()) return;
+          const d = parseCSVLine(line);
+          const firstName    = d[fi]?.trim();
+          const lastName     = d[li]?.trim();
           const nightsCamped = parseInt(d[ni]?.trim(), 10);
-          if (!firstName || !lastName || isNaN(nightsCamped)) return null;
-          return { id: `member-${Date.now()}-${idx}`, firstName, lastName, nightsCamped };
-        }).filter(Boolean);
+          if (!firstName || !lastName || isNaN(nightsCamped)) return;
+
+          if (bsai !== -1) {
+            const bsa = d[bsai]?.trim();
+            if (bsa && seen.has(bsa)) return;
+            if (bsa) seen.add(bsa);
+          }
+
+          const rankName  = ri !== -1 ? (d[ri]?.trim() || 'NO RANK') : 'NO RANK';
+          const rankValue = RANK_VALUES[rankName] || 1;
+
+          members.push({
+            id: `member-${Date.now()}-${idx}`,
+            firstName,
+            lastName,
+            nightsCamped,
+            rankName,
+            rankValue
+          });
+        });
+
+        return members;
       }
 
       // ── Assignment Upload / Download / Reset ──
@@ -704,7 +860,7 @@
               const target = document.getElementById(stackId) || troopStack;
               target.appendChild(tile);
             });
-            updateAllTotals();
+            updatePatrolStats();
           } catch (err) {
             assignmentFileError.textContent = `Error: ${err.message}`;
             assignmentFileError.style.display = 'block';
@@ -723,30 +879,43 @@
         const header = lines[0].split(',').map(h => h.trim().toLowerCase());
         const required = ['first name', 'last name', 'nights camped', 'patrol'];
         if (!required.every(h => header.includes(h)))
-          throw new Error("Assignment CSV must contain: 'First Name', 'Last Name', 'nights camped', 'Patrol'.");
+          throw new Error("Assignment CSV must contain: 'First Name', 'Last Name', 'Nights Camped', 'Patrol'.");
+
         return lines.slice(1).map((line, idx) => {
-          const d = line.split(',');
+          if (!line.trim()) return null;
+          const d = parseCSVLine(line);
           const obj = {};
-          header.forEach((h, i) => { obj[h.replace(/ /g, '')] = d[i]?.trim(); });
-          if (!obj.firstname || !obj.lastname || isNaN(parseInt(obj.nightscamped, 10))) return null;
+          header.forEach((h, i) => { obj[h] = d[i]?.trim(); });
+          const nightsCamped = parseInt(obj['nights camped'], 10);
+          if (!obj['first name'] || !obj['last name'] || isNaN(nightsCamped)) return null;
+          const rankName  = obj['rank'] || 'NO RANK';
+          const rankValue = RANK_VALUES[rankName] || 1;
           return {
             id: `member-${Date.now()}-${idx}`,
-            firstName:   obj.firstname,
-            lastName:    obj.lastname,
-            nightsCamped: parseInt(obj.nightscamped, 10),
-            patrol:      obj.patrol
+            firstName:    obj['first name'],
+            lastName:     obj['last name'],
+            nightsCamped,
+            rankName,
+            rankValue,
+            patrol: obj['patrol']
           };
         }).filter(Boolean);
       }
 
       function handleDownloadAssignments() {
-        const rows = [['First Name', 'Last Name', 'nights camped', 'Patrol']];
+        const rows = [['First Name', 'Last Name', 'Rank', 'Nights Camped', 'Patrol']];
         document.querySelectorAll('.tile').forEach(tile => {
           const parentId = tile.parentElement.id;
           const patrolName = parentId.startsWith('patrol-')
             ? `Patrol ${parentId.split('-')[1]}`
             : 'Troop';
-          rows.push([tile.dataset.firstName, tile.dataset.lastName, tile.dataset.nights, patrolName]);
+          rows.push([
+            tile.dataset.firstName,
+            tile.dataset.lastName,
+            tile.dataset.rankName,
+            tile.dataset.nights,
+            patrolName
+          ]);
         });
         triggerCSVDownload(rows, 'patrol_assignments.csv');
       }
@@ -755,7 +924,7 @@
         document.querySelectorAll('[id^="patrol-"]').forEach(patrol => {
           patrol.querySelectorAll('.tile').forEach(tile => troopStack.appendChild(tile));
         });
-        updateAllTotals();
+        updatePatrolStats();
       }
 
       function handleResetPatrol(event) {
@@ -764,7 +933,7 @@
         document.getElementById(`patrol-${patrolId}`)
           .querySelectorAll('.tile')
           .forEach(tile => troopStack.appendChild(tile));
-        updateAllTotals();
+        updatePatrolStats();
       }
 
       function handleAutoAssign() {
@@ -795,7 +964,7 @@
           target.memberCount++;
         });
 
-        updateAllTotals();
+        updatePatrolStats();
       }
 
       // ── Sorting ──
@@ -821,12 +990,20 @@
         tile.id = member.id;
         tile.className = 'tile';
         tile.draggable = true;
-        tile.dataset.firstName = member.firstName;
-        tile.dataset.lastName  = member.lastName;
-        tile.dataset.nights    = member.nightsCamped;
+        tile.dataset.firstName  = member.firstName;
+        tile.dataset.lastName   = member.lastName;
+        tile.dataset.nights     = member.nightsCamped;
+        tile.dataset.rankName   = member.rankName  || 'NO RANK';
+        tile.dataset.rankValue  = member.rankValue || 1;
+
+        const rs = RANK_STYLES[tile.dataset.rankName] || RANK_STYLES['NO RANK'];
+
         tile.innerHTML = `
           <p class="tile-name">${member.firstName} ${member.lastName}</p>
-          <p class="tile-nights">Nights: ${member.nightsCamped}</p>
+          <div class="tile-meta">
+            <span class="tile-rank-badge" style="background:${rs.bg};border:1px solid ${rs.border};color:${rs.text}">${tile.dataset.rankName} (${tile.dataset.rankValue})</span>
+            <span class="tile-nights">Nights: ${member.nightsCamped}</span>
+          </div>
         `;
         tile.addEventListener('dragstart', handleDragStart);
         tile.addEventListener('dragend',   handleDragEnd);
@@ -835,7 +1012,7 @@
 
       function clearAllStacks() {
         dropZones.forEach(z => (z.innerHTML = ''));
-        updateAllTotals();
+        updatePatrolStats();
       }
 
       // ── Drag & Drop ──
@@ -865,19 +1042,79 @@
             e.target.classList.remove('drag-over');
             if (draggedTile) {
               e.target.appendChild(draggedTile);
-              updateAllTotals();
+              updatePatrolStats();
             }
           }
         });
       });
 
-      // ── Totals ──
-      function updateAllTotals() {
+      // ── Patrol Stats (nights total + avg rank + pie chart) ──
+      function updatePatrolStats() {
         for (let i = 1; i <= 4; i++) {
-          const tiles = document.getElementById(`patrol-${i}`).querySelectorAll('.tile');
-          document.getElementById(`total-${i}`).textContent =
-            Array.from(tiles).reduce((sum, t) => sum + (parseInt(t.dataset.nights, 10) || 0), 0);
+          const tiles = Array.from(document.getElementById(`patrol-${i}`).querySelectorAll('.tile'));
+
+          // Nights total
+          const totalNights = tiles.reduce((sum, t) => sum + (parseInt(t.dataset.nights, 10) || 0), 0);
+          document.getElementById(`total-${i}`).textContent = totalNights;
+
+          // Avg rank name
+          const avgBadge = document.getElementById(`avg-rank-${i}`);
+          if (tiles.length > 0) {
+            const avg = tiles.reduce((sum, t) => sum + (parseInt(t.dataset.rankValue, 10) || 1), 0) / tiles.length;
+            const rounded = Math.min(8, Math.max(1, Math.round(avg)));
+            avgBadge.textContent = `Avg: ${RANK_NAMES[rounded]}`;
+            avgBadge.classList.add('visible');
+          } else {
+            avgBadge.textContent = '';
+            avgBadge.classList.remove('visible');
+          }
+
+          // Pie chart
+          drawPieChart(i, tiles);
         }
+      }
+
+      function drawPieChart(patrolIdx, tiles) {
+        const container = document.getElementById(`chart-${patrolIdx}`);
+        if (!container) return;
+
+        if (tiles.length === 0) {
+          container.innerHTML = '';
+          return;
+        }
+
+        const counts = {};
+        tiles.forEach(t => {
+          const rank = t.dataset.rankName || 'NO RANK';
+          counts[rank] = (counts[rank] || 0) + 1;
+        });
+
+        const orderedRanks = ['NO RANK', 'Scout', 'Tenderfoot', 'Second Class', 'First Class', 'Star', 'Life', 'Eagle'];
+        const slices = orderedRanks.filter(r => counts[r]).map(r => ({ rank: r, count: counts[r] }));
+        const total = tiles.length;
+
+        let deg = 0;
+        const gradParts = slices.map(s => {
+          const start = deg;
+          deg += (s.count / total) * 360;
+          const rs = RANK_STYLES[s.rank] || RANK_STYLES['NO RANK'];
+          return `${rs.solid} ${start.toFixed(1)}deg ${deg.toFixed(1)}deg`;
+        });
+
+        const legendHTML = slices.map(s => {
+          const rs = RANK_STYLES[s.rank] || RANK_STYLES['NO RANK'];
+          return `<div class="chart-legend-item">
+            <span class="legend-dot" style="background:${rs.solid}"></span>
+            <span>${s.rank} — ${s.count}</span>
+          </div>`;
+        }).join('');
+
+        container.innerHTML = `
+          <div class="chart-wrap">
+            <div class="pie-chart" style="background:conic-gradient(from -90deg, ${gradParts.join(', ')})"></div>
+            <div class="chart-legend">${legendHTML}</div>
+          </div>
+        `;
       }
 
       // ── CSV Helper ──
