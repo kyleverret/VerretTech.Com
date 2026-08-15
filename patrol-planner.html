@@ -1007,6 +1007,10 @@
         `;
         tile.addEventListener('dragstart', handleDragStart);
         tile.addEventListener('dragend',   handleDragEnd);
+        tile.addEventListener('dblclick',  () => {
+          troopStack.appendChild(tile);
+          updatePatrolStats();
+        });
         return tile;
       }
 
@@ -1016,16 +1020,23 @@
       }
 
       // ── Drag & Drop ──
-      let draggedTile = null;
+      let draggedTile  = null;
+      let droppedOnZone = false;
 
       function handleDragStart(event) {
-        draggedTile = event.target;
+        draggedTile   = event.target;
+        droppedOnZone = false;
         setTimeout(() => event.target.classList.add('dragging'), 0);
       }
 
       function handleDragEnd(event) {
         event.target.classList.remove('dragging');
-        draggedTile = null;
+        if (!droppedOnZone && draggedTile) {
+          troopStack.appendChild(draggedTile);
+          updatePatrolStats();
+        }
+        draggedTile  = null;
+        droppedOnZone = false;
       }
 
       dropZones.forEach(zone => {
@@ -1042,6 +1053,7 @@
             e.target.classList.remove('drag-over');
             if (draggedTile) {
               e.target.appendChild(draggedTile);
+              droppedOnZone = true;
               updatePatrolStats();
             }
           }
