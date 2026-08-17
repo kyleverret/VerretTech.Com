@@ -773,6 +773,15 @@
     /* ── BUDDY CONNECTOR VIEW ── */
     #buddy-view { display: none; }
 
+    .buddy-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      max-width: 860px;
+      margin: 0 auto 1.75rem;
+      flex-wrap: wrap;
+    }
+
     .buddy-intro {
       text-align: center;
       color: var(--muted);
@@ -1143,7 +1152,10 @@
 
       <!-- ── BUDDY CONNECTOR VIEW ── -->
       <div id="buddy-view">
-        <p class="buddy-intro">Link scouts as buddies. Use <strong style="color:var(--silver)">Move with Buddies</strong> to send a scout and all their buddies to a patrol together. The colored badge on each patrol tile shows buddy coverage in that patrol.</p>
+        <div class="buddy-toolbar">
+          <p class="buddy-intro" style="margin:0;text-align:left;">Link scouts as buddies. Use <strong style="color:var(--silver)">Move with Buddies</strong> to send a scout and all their buddies to a patrol together. The colored badge on each patrol tile shows buddy coverage in that patrol.</p>
+          <button id="downloadBuddiesBtn" class="planner-btn btn-steel" style="width:auto;white-space:nowrap;padding:0.45rem 1.1rem;margin:0;">Download Buddy Connections</button>
+        </div>
         <div id="buddy-scout-list" class="buddy-scout-list"></div>
       </div>
 
@@ -1235,6 +1247,7 @@
       const campingWeightSlider = document.getElementById('camping-weight-slider');
       const campingWeightPct    = document.getElementById('camping-weight-pct');
       const rankWeightPct       = document.getElementById('rank-weight-pct');
+      const downloadBuddiesBtn  = document.getElementById('downloadBuddiesBtn');
 
       // ── Init ──
       function init() {
@@ -1279,6 +1292,8 @@
           rankWeightPct.textContent    = `${100 - val}%`;
           computeAllStrengths();
         });
+
+        downloadBuddiesBtn.addEventListener('click', handleDownloadBuddyConnections);
       }
 
       // ── Tab switching ──
@@ -1286,7 +1301,7 @@
         document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
         document.getElementById('planner-view').style.display = tab === 'planner' ? '' : 'none';
         const bv = document.getElementById('buddy-view');
-        bv.style.display = tab === 'buddies' ? '' : 'none';
+        bv.style.display = tab === 'buddies' ? 'block' : 'none';
         if (tab === 'buddies') renderBuddyView();
       }
 
@@ -2057,6 +2072,25 @@
             patrol: obj['patrol']
           };
         }).filter(Boolean);
+      }
+
+      function handleDownloadBuddyConnections() {
+        const rows = [['Scout 1 First Name', 'Scout 1 Last Name', 'Scout 2 First Name', 'Scout 2 Last Name']];
+        const seen = new Set();
+        buddyLinks.forEach((buddies, scoutId) => {
+          const tileA = document.getElementById(scoutId);
+          if (!tileA) return;
+          buddies.forEach(buddyId => {
+            const pairKey = [scoutId, buddyId].sort().join('|');
+            if (seen.has(pairKey)) return;
+            seen.add(pairKey);
+            const tileB = document.getElementById(buddyId);
+            if (!tileB) return;
+            rows.push([tileA.dataset.firstName, tileA.dataset.lastName, tileB.dataset.firstName, tileB.dataset.lastName]);
+          });
+        });
+        if (rows.length === 1) return; // no connections to export
+        triggerCSVDownload(rows, 'buddy_connections.csv');
       }
 
       function handleDownloadAssignments() {
