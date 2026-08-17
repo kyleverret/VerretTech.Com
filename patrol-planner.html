@@ -1538,6 +1538,7 @@
         const nameEl = document.createElement('p');
         nameEl.className = 'tile-name';
         nameEl.textContent = `${member.firstName} ${member.lastName}`;
+        nameEl.title = `${member.firstName} ${member.lastName}`;
 
         topRow.appendChild(nameEl);
         topRow.appendChild(patrolSel);
@@ -2061,6 +2062,45 @@
       // ROSTER UPLOAD / DOWNLOAD
       // ════════════════════════════════════════════════
 
+      const SKIP_PATROL_NAMES = new Set(['troop', 'unassigned', 'inactive', '']);
+
+      function ensurePatrolsFromCSV(patrolNames) {
+        const existing = new Set(patrols.map(p => p.name.toLowerCase()));
+        let added = false;
+        patrolNames.forEach(raw => {
+          const name = (raw || '').trim();
+          if (!name || SKIP_PATROL_NAMES.has(name.toLowerCase())) return;
+          if (existing.has(name.toLowerCase())) return;
+          const id = nextPatrolId++;
+          const color = PATROL_COLOR_LIST[patrols.length % PATROL_COLOR_LIST.length];
+          patrols.push({ id, name, color });
+          existing.add(name.toLowerCase());
+          added = true;
+        });
+        if (added) renderPatrols();
+      }
+
+      function placeAssignments(assignments) {
+        ensurePatrolsFromCSV(assignments.map(m => m.patrol || ''));
+        assignments.forEach(member => {
+          const tile = createTile(member);
+          const key = (member.patrol || '').toLowerCase();
+          if (key === 'inactive') {
+            setTileInactive(tile, true);
+            troopStack.appendChild(tile);
+          } else if (!SKIP_PATROL_NAMES.has(key)) {
+            const match = patrols.find(p => p.name.toLowerCase() === key);
+            const zone  = match ? document.getElementById(`patrol-${match.id}`) : null;
+            (zone || troopStack).appendChild(tile);
+          } else {
+            troopStack.appendChild(tile);
+          }
+          syncTileDropdown(tile);
+        });
+        updatePatrolStats();
+        updateAllBuddyIndicators();
+      }
+
       function handleRosterUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -2071,8 +2111,13 @@
         reader.onload = (e) => {
           try {
             const members = parseRosterCSV(e.target.result);
-            members.forEach(m => troopStack.appendChild(createTile(m)));
-            updateScoutCount();
+            const hasPatrol = members.some(m => m.patrol && !SKIP_PATROL_NAMES.has(m.patrol.toLowerCase()));
+            if (hasPatrol) {
+              placeAssignments(members);
+            } else {
+              members.forEach(m => troopStack.appendChild(createTile(m)));
+              updateScoutCount();
+            }
           } catch (err) {
             rosterFileError.textContent = `Error: ${err.message}`;
             rosterFileError.style.display = 'block';
@@ -2117,6 +2162,7 @@
         const ni   = header.indexOf('nights camped');
         const ri   = header.indexOf('rank');
         const bsai = header.indexOf('bsa number');
+        const pi   = header.indexOf('patrol');
 
         if (fi === -1 || li === -1 || ni === -1)
           throw new Error("CSV must contain columns: 'First Name', 'Last Name', 'Nights Camped'.");
@@ -2139,7 +2185,8 @@
 
           const rankName  = ri !== -1 ? (d[ri]?.trim() || 'NO RANK') : 'NO RANK';
           const rankValue = RANK_VALUES[rankName] || 1;
-          members.push({ id: `member-${Date.now()}-${idx}`, firstName, lastName, nightsCamped, rankName, rankValue });
+          const patrol    = pi !== -1 ? (d[pi]?.trim() || '') : '';
+          members.push({ id: `member-${Date.now()}-${idx}`, firstName, lastName, nightsCamped, rankName, rankValue, patrol });
         });
         return members;
       }
@@ -2154,19 +2201,7 @@
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
-            const assignments = parseAssignmentsCSV(e.target.result);
-            assignments.forEach(member => {
-              const tile = createTile(member);
-              let targetEl = troopStack;
-              if (member.patrol && !['troop', 'unassigned'].includes(member.patrol.toLowerCase())) {
-                const match = patrols.find(p => p.name.toLowerCase() === member.patrol.toLowerCase());
-                if (match) targetEl = document.getElementById(`patrol-${match.id}`) || troopStack;
-              }
-              targetEl.appendChild(tile);
-              syncTileDropdown(tile);
-            });
-            updatePatrolStats();
-            updateAllBuddyIndicators();
+            placeAssignments(parseAssignmentsCSV(e.target.result));
           } catch (err) {
             assignmentFileError.textContent = `Error: ${err.message}`;
             assignmentFileError.style.display = 'block';
