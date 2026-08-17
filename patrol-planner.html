@@ -574,6 +574,26 @@
     .sort-btn:hover { background: rgba(120, 154, 181, 0.1); color: var(--steel); }
     .sort-btn svg { width: 15px; height: 15px; fill: currentColor; }
 
+    .sort-rank-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 1;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Sort row below patrol card header */
+    .patrol-sort-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.1rem;
+      padding: 0.1rem 0 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .patrol-sort-row .sort-btn { width: 24px; height: 24px; }
+    .patrol-sort-row .sort-btn svg { width: 13px; height: 13px; }
+
     .patrol-badge {
       display: flex;
       align-items: center;
@@ -639,6 +659,15 @@
 
     .tile:hover { background: var(--navy-3); border-color: rgba(120, 154, 181, 0.3); }
     .tile:active { cursor: grabbing; }
+
+    .tile.tile-inactive {
+      opacity: 0.38;
+      cursor: default;
+      border-style: dashed;
+      border-color: rgba(120,154,181,0.12);
+    }
+
+    .tile.tile-inactive:hover { background: var(--navy-2); border-color: rgba(120,154,181,0.18); }
 
     .tile.dragging {
       opacity: 0.4;
@@ -1083,6 +1112,16 @@
           <div class="scout-count-chip">Scouts: <strong id="scout-count-display">0</strong></div>
           <div class="patrol-mgmt-divider"></div>
           <button id="strength-toggle-btn" class="patrol-mgmt-btn strength-toggle-btn" title="Patrol Strength settings">⚡ Strength</button>
+          <div class="patrol-mgmt-divider"></div>
+          <select id="sort-all-select" class="patrol-mgmt-select">
+            <option value="">Sort all scouts…</option>
+            <option value="name-asc">Name A→Z</option>
+            <option value="name-desc">Name Z→A</option>
+            <option value="rank-asc">Rank Low→High</option>
+            <option value="rank-desc">Rank High→Low</option>
+            <option value="nights-asc">Nights Low→High</option>
+            <option value="nights-desc">Nights High→Low</option>
+          </select>
         </div>
 
         <!-- Patrol Strength Settings Panel -->
@@ -1114,7 +1153,7 @@
             <span class="control-label" style="margin-top:0.75rem;">Or upload a previously saved assignment file.</span>
             <input type="file" id="assignmentFile" accept=".csv" />
             <p id="assignment-file-error" class="error-text" style="display:none;"></p>
-            <button id="resetAssignmentsBtn" class="planner-btn btn-danger">Reset All to Troop</button>
+            <button id="resetAssignmentsBtn" class="planner-btn btn-danger">Reset All to Unassigned</button>
           </div>
 
         </div>
@@ -1122,10 +1161,10 @@
         <!-- Stacks -->
         <div class="stacks-grid">
 
-          <!-- Troop Stack -->
+          <!-- Unassigned Stack -->
           <div class="stack-card">
             <div class="stack-card-header">
-              <h2>Troop</h2>
+              <h2>Unassigned</h2>
               <div class="sort-controls">
                 <button id="sort-name-asc" class="sort-btn" title="Sort Name A–Z">
                   <svg viewBox="0 0 20 20"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/></svg>
@@ -1133,6 +1172,8 @@
                 <button id="sort-name-desc" class="sort-btn" title="Sort Name Z–A">
                   <svg viewBox="0 0 20 20"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 8a1 1 0 102 0V2.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 3.586V8z"/></svg>
                 </button>
+                <button id="sort-rank-asc" class="sort-btn" title="Sort Rank Low→High"><span class="sort-rank-label">R↑</span></button>
+                <button id="sort-rank-desc" class="sort-btn" title="Sort Rank High→Low"><span class="sort-rank-label">R↓</span></button>
                 <button id="sort-nights-asc" class="sort-btn" title="Sort Nights Low→High">
                   <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                 </button>
@@ -1248,6 +1289,7 @@
       const campingWeightPct    = document.getElementById('camping-weight-pct');
       const rankWeightPct       = document.getElementById('rank-weight-pct');
       const downloadBuddiesBtn  = document.getElementById('downloadBuddiesBtn');
+      const sortAllSelect       = document.getElementById('sort-all-select');
 
       // ── Init ──
       function init() {
@@ -1264,10 +1306,19 @@
         resetAssignmentsBtn.addEventListener('click', handleResetAssignments);
         autoAssignBtn.addEventListener('click', handleAutoAssign);
 
-        document.getElementById('sort-name-asc').addEventListener('click',    () => sortTroopStack('name', 'asc'));
-        document.getElementById('sort-name-desc').addEventListener('click',   () => sortTroopStack('name', 'desc'));
-        document.getElementById('sort-nights-asc').addEventListener('click',  () => sortTroopStack('nights', 'asc'));
-        document.getElementById('sort-nights-desc').addEventListener('click', () => sortTroopStack('nights', 'desc'));
+        document.getElementById('sort-name-asc').addEventListener('click',    () => sortZone(troopStack, 'name', 'asc'));
+        document.getElementById('sort-name-desc').addEventListener('click',   () => sortZone(troopStack, 'name', 'desc'));
+        document.getElementById('sort-rank-asc').addEventListener('click',    () => sortZone(troopStack, 'rank', 'asc'));
+        document.getElementById('sort-rank-desc').addEventListener('click',   () => sortZone(troopStack, 'rank', 'desc'));
+        document.getElementById('sort-nights-asc').addEventListener('click',  () => sortZone(troopStack, 'nights', 'asc'));
+        document.getElementById('sort-nights-desc').addEventListener('click', () => sortZone(troopStack, 'nights', 'desc'));
+
+        sortAllSelect.addEventListener('change', (e) => {
+          if (!e.target.value) return;
+          const [criteria, direction] = e.target.value.split('-');
+          sortAllZones(criteria, direction);
+          e.target.value = '';
+        });
 
         addPatrolBtn.addEventListener('click', () => setPatrolCount(patrols.length + 1));
         removePatrolBtn.addEventListener('click', () => setPatrolCount(patrols.length - 1));
@@ -1394,6 +1445,31 @@
         chart.id = `chart-${patrol.id}`;
         chart.className = 'patrol-chart';
 
+        // Sort row for patrol
+        const sortRow = document.createElement('div');
+        sortRow.className = 'patrol-sort-row';
+        sortRow.innerHTML = `
+          <button class="sort-btn" data-c="name" data-d="asc" title="Sort Name A–Z">
+            <svg viewBox="0 0 20 20"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z"/></svg>
+          </button>
+          <button class="sort-btn" data-c="name" data-d="desc" title="Sort Name Z–A">
+            <svg viewBox="0 0 20 20"><path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 8a1 1 0 102 0V2.414l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 3.586V8z"/></svg>
+          </button>
+          <button class="sort-btn" data-c="rank" data-d="asc" title="Sort Rank Low→High"><span class="sort-rank-label">R↑</span></button>
+          <button class="sort-btn" data-c="rank" data-d="desc" title="Sort Rank High→Low"><span class="sort-rank-label">R↓</span></button>
+          <button class="sort-btn" data-c="nights" data-d="asc" title="Sort Nights Low→High">
+            <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          </button>
+          <button class="sort-btn" data-c="nights" data-d="desc" title="Sort Nights High→Low">
+            <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+          </button>
+        `;
+        sortRow.querySelectorAll('.sort-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            sortZone(document.getElementById(`patrol-${patrol.id}`), btn.dataset.c, btn.dataset.d);
+          });
+        });
+
         const strengthRow = document.createElement('div');
         strengthRow.id = `strength-row-${patrol.id}`;
         strengthRow.className = 'patrol-strength-row';
@@ -1404,6 +1480,7 @@
         `;
 
         card.appendChild(header);
+        card.appendChild(sortRow);
         card.appendChild(strengthRow);
         card.appendChild(dropZone);
         card.appendChild(chart);
@@ -1436,6 +1513,16 @@
         patrolSel.addEventListener('change', (e) => {
           e.stopPropagation();
           const val = e.target.value;
+          if (val === 'inactive') {
+            setTileInactive(tile, true);
+            troopStack.appendChild(tile);
+            patrolSel.value = 'inactive';
+            updatePatrolStats();
+            updateAllBuddyIndicators();
+            return;
+          }
+          // Coming from inactive — restore
+          if (tile.classList.contains('tile-inactive')) setTileInactive(tile, false);
           const target = val === 'troop' ? troopStack : document.getElementById(val);
           if (target) {
             target.appendChild(tile);
@@ -1468,7 +1555,35 @@
 
         tile.addEventListener('dragstart', handleDragStart);
         tile.addEventListener('dragend',   handleDragEnd);
+
+        // Allow dropping onto a tile (not just empty zone space)
+        tile.addEventListener('dragover', (e) => {
+          if (!draggedTile || draggedTile === tile || tile.classList.contains('tile-inactive')) return;
+          e.preventDefault();
+          const zone = tile.closest('.drop-zone');
+          if (zone) zone.classList.add('drag-over');
+        });
+        tile.addEventListener('dragleave', (e) => {
+          const zone = tile.closest('.drop-zone');
+          if (zone && !zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+        });
+        tile.addEventListener('drop', (e) => {
+          if (!draggedTile || draggedTile === tile || tile.classList.contains('tile-inactive')) return;
+          e.preventDefault();
+          e.stopPropagation();
+          const zone = tile.closest('.drop-zone');
+          if (zone) {
+            zone.classList.remove('drag-over');
+            zone.appendChild(draggedTile);
+            droppedOnZone = true;
+            syncTileDropdown(draggedTile);
+            updatePatrolStats();
+            updateAllBuddyIndicators();
+          }
+        });
+
         tile.addEventListener('dblclick', () => {
+          if (tile.classList.contains('tile-inactive')) return;
           troopStack.appendChild(tile);
           syncTileDropdown(tile);
           updatePatrolStats();
@@ -1480,19 +1595,35 @@
       // ── Patrol select helpers ──
       function populatePatrolSelect(sel) {
         const oldVal = sel.value;
-        sel.innerHTML = '<option value="troop">Troop</option>';
+        sel.innerHTML = '<option value="troop">Unassigned</option>';
         patrols.forEach(p => {
           const opt = document.createElement('option');
           opt.value = `patrol-${p.id}`;
           opt.textContent = p.name;
           sel.appendChild(opt);
         });
+        const inactiveOpt = document.createElement('option');
+        inactiveOpt.value = 'inactive';
+        inactiveOpt.textContent = 'Inactive';
+        sel.appendChild(inactiveOpt);
         if (oldVal && sel.querySelector(`option[value="${CSS.escape(oldVal)}"]`)) sel.value = oldVal;
+      }
+
+      function setTileInactive(tile, inactive) {
+        tile.classList.toggle('tile-inactive', inactive);
+        tile.draggable = !inactive;
+        if (inactive) {
+          // Move to troop stack, at the very bottom
+          troopStack.appendChild(tile);
+          syncTileDropdown(tile);
+          tile.querySelector('.tile-patrol-select').value = 'inactive';
+        }
       }
 
       function syncTileDropdown(tile) {
         const sel = tile.querySelector('.tile-patrol-select');
         if (!sel) return;
+        if (tile.classList.contains('tile-inactive')) { sel.value = 'inactive'; return; }
         const pid = tile.parentElement?.id;
         sel.value = pid && pid.startsWith('patrol-') ? pid : 'troop';
       }
@@ -1702,7 +1833,7 @@
         const buddies = getBuddies(scoutId);
         const pid = tile.parentElement?.id;
         const patrol = patrols.find(p => `patrol-${p.id}` === pid);
-        const patrolName = patrol ? patrol.name : 'Troop';
+        const patrolName = patrol ? patrol.name : 'Unassigned';
         const coverage = getBuddyCoverage(scoutId);
 
         const card = document.createElement('div');
@@ -1826,7 +1957,7 @@
           });
           const troopOpt = document.createElement('option');
           troopOpt.value = 'troop';
-          troopOpt.textContent = 'Troop';
+          troopOpt.textContent = 'Unassigned';
           moveSel.appendChild(troopOpt);
 
           const moveBtn = document.createElement('button');
@@ -2027,7 +2158,7 @@
             assignments.forEach(member => {
               const tile = createTile(member);
               let targetEl = troopStack;
-              if (member.patrol && member.patrol.toLowerCase() !== 'troop') {
+              if (member.patrol && !['troop', 'unassigned'].includes(member.patrol.toLowerCase())) {
                 const match = patrols.find(p => p.name.toLowerCase() === member.patrol.toLowerCase());
                 if (match) targetEl = document.getElementById(`patrol-${match.id}`) || troopStack;
               }
@@ -2096,8 +2227,12 @@
       function handleDownloadAssignments() {
         const rows = [['First Name', 'Last Name', 'Rank', 'Nights Camped', 'Patrol']];
         document.querySelectorAll('.tile').forEach(tile => {
+          if (tile.classList.contains('tile-inactive')) {
+            rows.push([tile.dataset.firstName, tile.dataset.lastName, tile.dataset.rankName, tile.dataset.nights, 'Inactive']);
+            return;
+          }
           const pid = tile.parentElement?.id;
-          let patrolName = 'Troop';
+          let patrolName = 'Unassigned';
           if (pid && pid.startsWith('patrol-')) {
             const id = parseInt(pid.split('-')[1]);
             const p = patrols.find(p => p.id === id);
@@ -2150,18 +2285,31 @@
       }
 
       // ── Sorting ──
-      function sortTroopStack(criteria, direction) {
-        const tiles = Array.from(troopStack.querySelectorAll('.tile'));
-        tiles.sort((a, b) => {
-          const va = criteria === 'name'
-            ? `${a.dataset.lastName} ${a.dataset.firstName}`.toLowerCase()
-            : parseInt(a.dataset.nights, 10);
-          const vb = criteria === 'name'
-            ? `${b.dataset.lastName} ${b.dataset.firstName}`.toLowerCase()
-            : parseInt(b.dataset.nights, 10);
+      function tileValue(tile, criteria) {
+        if (criteria === 'name')   return `${tile.dataset.lastName} ${tile.dataset.firstName}`.toLowerCase();
+        if (criteria === 'rank')   return parseInt(tile.dataset.rankValue, 10) || 1;
+        if (criteria === 'nights') return parseInt(tile.dataset.nights, 10) || 0;
+        return 0;
+      }
+
+      function sortZone(zone, criteria, direction) {
+        const tiles = Array.from(zone.querySelectorAll('.tile'));
+        // Keep inactive tiles at the bottom regardless of sort
+        const active   = tiles.filter(t => !t.classList.contains('tile-inactive'));
+        const inactive = tiles.filter(t =>  t.classList.contains('tile-inactive'));
+        active.sort((a, b) => {
+          const va = tileValue(a, criteria), vb = tileValue(b, criteria);
           return va < vb ? (direction === 'asc' ? -1 : 1) : va > vb ? (direction === 'asc' ? 1 : -1) : 0;
         });
-        tiles.forEach(tile => troopStack.appendChild(tile));
+        [...active, ...inactive].forEach(tile => zone.appendChild(tile));
+      }
+
+      function sortAllZones(criteria, direction) {
+        sortZone(troopStack, criteria, direction);
+        patrols.forEach(p => {
+          const zone = document.getElementById(`patrol-${p.id}`);
+          if (zone) sortZone(zone, criteria, direction);
+        });
       }
 
       // ── Helpers ──
