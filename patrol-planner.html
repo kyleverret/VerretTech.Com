@@ -215,6 +215,157 @@
 
     .patrol-mgmt-select:hover { border-color: rgba(120, 154, 181, 0.4); color: var(--white); }
 
+    /* Scout count chip */
+    .scout-count-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.22rem 0.6rem;
+      background: rgba(120,154,181,0.08);
+      border: 1px solid rgba(120,154,181,0.18);
+      border-radius: 2px;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .scout-count-chip strong {
+      font-weight: 500;
+      color: var(--gold);
+    }
+
+    /* Strength toggle button modifier */
+    .strength-toggle-btn {
+      width: auto !important;
+      padding: 0 0.6rem !important;
+      font-size: 0.67rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* Patrol Strength Settings Panel */
+    .strength-panel {
+      display: none;
+      background: var(--navy-2);
+      border: 1px solid rgba(120,154,181,0.15);
+      border-top: none;
+      border-radius: 0 0 2px 2px;
+      padding: 1rem 1.5rem 1.2rem;
+      max-width: 900px;
+      margin: -1.5rem auto 1.5rem;
+    }
+
+    .strength-panel.open { display: block; }
+
+    .strength-panel-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin-bottom: 0.8rem;
+    }
+
+    .strength-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .strength-slider-label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 4.5rem;
+    }
+
+    .strength-slider-label:last-child { text-align: right; }
+    .strength-slider-label strong { font-weight: 500; color: var(--silver); }
+
+    input[type="range"].strength-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: linear-gradient(to right, #38bdf8, #b8986a);
+      outline: none;
+      cursor: pointer;
+      border: none;
+    }
+
+    input[type="range"].strength-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--steel);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    input[type="range"].strength-slider::-webkit-slider-thumb:hover { border-color: var(--gold); }
+
+    input[type="range"].strength-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--white);
+      border: 2px solid var(--steel);
+      cursor: pointer;
+    }
+
+    .strength-rank-ref {
+      margin-top: 0.65rem;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    /* Patrol strength row (inside each patrol card, above the drop zone) */
+    .patrol-strength-row {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0;
+      margin-bottom: 0.15rem;
+      flex-shrink: 0;
+    }
+
+    .patrol-strength-row.visible { display: flex; }
+
+    .patrol-strength-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      flex-shrink: 0;
+      min-width: 3.2rem;
+    }
+
+    .patrol-temp-bar {
+      flex: 1;
+      height: 5px;
+      background: rgba(120,154,181,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .patrol-temp-fill {
+      height: 100%;
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.4s ease, background-color 0.4s ease;
+    }
+
+    .patrol-strength-val {
+      font-size: 0.75rem;
+      font-weight: 500;
+      min-width: 2.2rem;
+      text-align: right;
+      flex-shrink: 0;
+      transition: color 0.4s;
+    }
+
     /* ── CONTROL GRID ── */
     .control-grid {
       display: grid;
@@ -919,6 +1070,21 @@
             <option value="7">7 patrols</option>
             <option value="8">8 patrols</option>
           </select>
+          <div class="patrol-mgmt-divider"></div>
+          <div class="scout-count-chip">Scouts: <strong id="scout-count-display">0</strong></div>
+          <div class="patrol-mgmt-divider"></div>
+          <button id="strength-toggle-btn" class="patrol-mgmt-btn strength-toggle-btn" title="Patrol Strength settings">⚡ Strength</button>
+        </div>
+
+        <!-- Patrol Strength Settings Panel -->
+        <div id="strength-panel" class="strength-panel">
+          <div class="strength-panel-title">Patrol Strength Weights</div>
+          <div class="strength-slider-row">
+            <span class="strength-slider-label">Rank <strong id="rank-weight-pct">50%</strong></span>
+            <input type="range" class="strength-slider" id="camping-weight-slider" min="0" max="100" value="50" />
+            <span class="strength-slider-label">Camping <strong id="camping-weight-pct">50%</strong></span>
+          </div>
+          <p class="strength-rank-ref">Rank scores — Scout: 0 · Tenderfoot: 1 · Second Class: 2 · First Class: 3 · Star: 4 · Life: 5 · Eagle: 6</p>
         </div>
 
         <!-- Control Center -->
@@ -1030,6 +1196,11 @@
         rose:   { bg: 'rgba(251,113,133,0.1)',  color: '#fb7185',  border: 'rgba(251,113,133,0.3)' },
       };
 
+      const RANK_STRENGTH_SCORES = {
+        'NO RANK': 0, 'Scout': 0, 'Tenderfoot': 1, 'Second Class': 2,
+        'First Class': 3, 'Star': 4, 'Life': 5, 'Eagle': 6
+      };
+
       // ── State ──
       let patrols = [
         { id: 1, name: 'Patrol 1', color: 'blue'  },
@@ -1038,6 +1209,7 @@
         { id: 4, name: 'Patrol 4', color: 'red'   },
       ];
       let nextPatrolId = 5;
+      let campingWeight = 0.5;
       const buddyLinks = new Map(); // scoutId → Set<scoutId> (bidirectional)
       let draggedTile  = null;
       let droppedOnZone = false;
@@ -1057,6 +1229,12 @@
       const addPatrolBtn        = document.getElementById('add-patrol-btn');
       const removePatrolBtn     = document.getElementById('remove-patrol-btn');
       const patrolSetSelect     = document.getElementById('patrol-set-select');
+      const scoutCountDisplay   = document.getElementById('scout-count-display');
+      const strengthToggleBtn   = document.getElementById('strength-toggle-btn');
+      const strengthPanel       = document.getElementById('strength-panel');
+      const campingWeightSlider = document.getElementById('camping-weight-slider');
+      const campingWeightPct    = document.getElementById('camping-weight-pct');
+      const rankWeightPct       = document.getElementById('rank-weight-pct');
 
       // ── Init ──
       function init() {
@@ -1088,6 +1266,18 @@
 
         document.querySelectorAll('.view-tab').forEach(btn => {
           btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        });
+
+        strengthToggleBtn.addEventListener('click', () => {
+          strengthPanel.classList.toggle('open');
+        });
+
+        campingWeightSlider.addEventListener('input', () => {
+          const val = parseInt(campingWeightSlider.value, 10);
+          campingWeight = val / 100;
+          campingWeightPct.textContent = `${val}%`;
+          rankWeightPct.textContent    = `${100 - val}%`;
+          computeAllStrengths();
         });
       }
 
@@ -1165,7 +1355,7 @@
           <div class="patrol-badge">
             <span class="nights-badge" id="nights-badge-${patrol.id}"
               style="background:${cs.bg};color:${cs.color};border:1px solid ${cs.border}">
-              Nights:&nbsp;<span id="total-${patrol.id}">0</span>
+              Avg Nights:&nbsp;<span id="total-${patrol.id}">—</span>
             </span>
             <button class="reset-patrol-btn" title="Reset ${patrol.name}">
               <svg viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
@@ -1189,7 +1379,17 @@
         chart.id = `chart-${patrol.id}`;
         chart.className = 'patrol-chart';
 
+        const strengthRow = document.createElement('div');
+        strengthRow.id = `strength-row-${patrol.id}`;
+        strengthRow.className = 'patrol-strength-row';
+        strengthRow.innerHTML = `
+          <span class="patrol-strength-label">Strength</span>
+          <div class="patrol-temp-bar"><div class="patrol-temp-fill" id="temp-fill-${patrol.id}"></div></div>
+          <span class="patrol-strength-val" id="strength-val-${patrol.id}">—</span>
+        `;
+
         card.appendChild(header);
+        card.appendChild(strengthRow);
         card.appendChild(dropZone);
         card.appendChild(chart);
         return card;
@@ -1412,6 +1612,55 @@
       }
 
       // ════════════════════════════════════════════════
+      // SCOUT COUNT + PATROL STRENGTH
+      // ════════════════════════════════════════════════
+
+      function updateScoutCount() {
+        const count = document.querySelectorAll('.tile').length;
+        if (scoutCountDisplay) scoutCountDisplay.textContent = count;
+      }
+
+      function getStrengthColor(strength) {
+        // cold blue (hue 200) → hot red (hue 0) across 0–100
+        const hue = Math.max(0, Math.round(200 - 2 * strength));
+        return `hsl(${hue}, 75%, 60%)`;
+      }
+
+      function computeAllStrengths() {
+        const allTiles = Array.from(document.querySelectorAll('.tile'));
+        const maxNights = allTiles.reduce((m, t) => Math.max(m, parseInt(t.dataset.nights, 10) || 0), 1);
+
+        patrols.forEach(patrol => {
+          const strengthRow = document.getElementById(`strength-row-${patrol.id}`);
+          const tempFill    = document.getElementById(`temp-fill-${patrol.id}`);
+          const strengthVal = document.getElementById(`strength-val-${patrol.id}`);
+          if (!strengthRow || !tempFill || !strengthVal) return;
+
+          const tiles = Array.from(document.getElementById(`patrol-${patrol.id}`)?.querySelectorAll('.tile') || []);
+
+          if (tiles.length === 0) {
+            strengthRow.classList.remove('visible');
+            return;
+          }
+
+          const avgScore = tiles.reduce((sum, t) => {
+            const normNights = (parseInt(t.dataset.nights, 10) || 0) / maxNights;
+            const normRank   = (RANK_STRENGTH_SCORES[t.dataset.rankName] ?? 0) / 6;
+            return sum + (campingWeight * normNights + (1 - campingWeight) * normRank);
+          }, 0) / tiles.length;
+
+          const strength = Math.round(avgScore * 100);
+          const color = getStrengthColor(strength);
+
+          tempFill.style.width = `${strength}%`;
+          tempFill.style.backgroundColor = color;
+          strengthVal.textContent = strength;
+          strengthVal.style.color = color;
+          strengthRow.classList.add('visible');
+        });
+      }
+
+      // ════════════════════════════════════════════════
       // BUDDY CONNECTOR VIEW
       // ════════════════════════════════════════════════
 
@@ -1600,14 +1849,16 @@
       // ════════════════════════════════════════════════
 
       function updatePatrolStats() {
+        updateScoutCount();
         patrols.forEach(patrol => {
           const el = document.getElementById(`patrol-${patrol.id}`);
           if (!el) return;
           const tiles = Array.from(el.querySelectorAll('.tile'));
 
-          const totalNights = tiles.reduce((s, t) => s + (parseInt(t.dataset.nights, 10) || 0), 0);
+          const sumNights = tiles.reduce((s, t) => s + (parseInt(t.dataset.nights, 10) || 0), 0);
+          const avgNights = tiles.length > 0 ? sumNights / tiles.length : 0;
           const totalEl = document.getElementById(`total-${patrol.id}`);
-          if (totalEl) totalEl.textContent = totalNights;
+          if (totalEl) totalEl.textContent = tiles.length > 0 ? avgNights.toFixed(1) : '—';
 
           const avgBadge = document.getElementById(`avg-rank-${patrol.id}`);
           if (avgBadge) {
@@ -1623,6 +1874,7 @@
           }
           drawPieChart(patrol.id, tiles);
         });
+        computeAllStrengths();
       }
 
       function drawPieChart(patrolId, tiles) {
@@ -1674,6 +1926,7 @@
           try {
             const members = parseRosterCSV(e.target.result);
             members.forEach(m => troopStack.appendChild(createTile(m)));
+            updateScoutCount();
           } catch (err) {
             rosterFileError.textContent = `Error: ${err.message}`;
             rosterFileError.style.display = 'block';
